@@ -1,0 +1,48 @@
+class Trie {
+public:
+    unordered_map<char, Trie*> children;
+    priority_queue<string> words;
+};
+
+class Solution {
+private:
+    Trie* root = new Trie();
+    
+public:
+    vector<vector<string>> suggestedProducts(vector<string>& products, string w) {
+        for (string& s : products) {
+            buildTrie(root, s);
+        }
+        
+        int n = w.size();
+        vector<vector<string>> res(n);
+        Trie* cur = root;
+        
+        for (int i = 0; i < n; ++i) {
+            if (cur->children.count(w[i]) <= 0) break;
+            else {
+                cur = cur->children[w[i]];
+                vector<string> temp(cur->words.size());
+                for (int j = temp.size()-1; j >= 0; --j) {
+                    temp[j] = cur->words.top();
+                    cur->words.pop();
+                }
+                res[i] = temp;
+            }
+        }
+        
+        return res;
+    }
+    
+    void buildTrie(Trie* cur, string& s) {
+        for (char c : s) {
+            if (cur->children.count(c) <= 0) cur->children[c] = new Trie();
+            cur = cur->children[c];
+            cur->words.push(s);
+            //we only care about three lexicographically minimums products here...
+            while (cur->words.size() > 3) {
+                cur->words.pop();
+            }
+        }
+    }
+};
