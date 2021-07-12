@@ -1,0 +1,47 @@
+class UnionFindSet {
+private:
+    vector<int> parents_;
+    vector<int> rank_;
+public:
+    UnionFindSet (int n) {
+        parents_.resize(n+1);
+        rank_.resize(n+1);
+        for(int i = 0; i <= n; i++) {
+            parents_[i] = i; //parents will be updated later with Union function call
+        }
+    }
+    
+    int Find(int x) {
+        if (parents_[x] != x) {
+            parents_[x] = Find(parents_[x]); //path compression
+        }
+        return parents_[x];
+    }
+    
+    bool Union(int x, int y) {
+        int rx = Find(x), ry = Find(y);
+        if (rx == ry) return false;
+        //union by rank, here we only care about rank of root!
+        if (rank_[rx] > rank_[ry]) parents_[ry] = rx;
+        else if (rank_[ry] < rank_[rx]) parents_[rx] = ry;
+        else {
+            parents_[ry] = rx;
+            rank_[rx]++;
+        }
+        return true;
+    }
+};
+
+class Solution {
+public:
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        int n = edges.size();
+        UnionFindSet s(n);
+        
+        for (int i = 0; i < n; ++i) {
+            if (!s.Union(edges[i][0], edges[i][1])) return edges[i];
+        }
+        
+        return {};
+    }
+};
