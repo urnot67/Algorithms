@@ -1,0 +1,35 @@
+//this is a general approach. reverse Nodes in k-Group.
+class Solution {
+public:
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        if (k == 1) return head;
+        ListNode* dummy = new ListNode();
+        dummy->next = head;
+        ListNode* prev = dummy, * a = head, * b = head;
+        int i = 0;
+        while (b) {
+            i++;
+            if (i == k) {
+                ListNode* temp = b->next;
+                reverseLinkList(prev, a, b); //after function call, it still points to the original node!!!!!! However, node relationships changed!!!
+                i = 0;
+                prev = a;
+                a = temp;
+                b = temp;
+            }
+            else if (b) b = b->next;
+        }
+        return dummy->next;
+    }
+    
+    void reverseLinkList(ListNode* prev, ListNode* a, ListNode* b) {
+        ListNode* c = b->next;
+        prev->next = b->next; //break the linked list here!
+        while (a != c) {
+            ListNode* temp = a->next;
+            a->next = prev->next;
+            prev->next = a;
+            a = temp;
+        }
+    }
+};
