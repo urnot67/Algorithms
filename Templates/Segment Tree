@@ -1,0 +1,82 @@
+class NumArray {
+private:
+    vector<int> segTree;
+    int n;
+public:
+    NumArray(vector<int>& nums) {
+        n = nums.size();
+        segTree.resize(4*n, 0);
+        buildTree(nums, 0, 0, n-1);
+        
+    }
+    
+    void update(int index, int val) {
+        updateTree(0, index, val, 0, n-1);
+    }
+    
+    int sumRange(int left, int right) {
+        return queryTree(0, left, right, 0, n-1);
+    }
+    
+    void buildTree(vector<int>& nums, int treeIndex, int lo, int hi) {
+        //leaf node, store value in node
+        if (lo == hi) {
+            segTree[treeIndex] = nums[lo];
+            return;
+        }
+        
+        //recurse deeper to leaf nodes to build the tree
+        int mid = lo + (hi - lo) / 2;
+        buildTree(nums, 2 * treeIndex + 1, lo, mid);
+        buildTree(nums, 2 * treeIndex + 2, mid+1, hi);
+        
+        //merge build results
+        segTree[treeIndex] = segTree[2 * treeIndex + 1] + segTree[2 * treeIndex + 2];
+    }
+    
+    void updateTree(int treeIndex, int index, int val, int lo, int hi) {
+        //found the target index
+        if (lo == hi) {
+            segTree[treeIndex] = val;
+            return;
+        }
+        
+        int mid = lo + (hi - lo) / 2;
+        
+        if (index > mid) {
+            updateTree(2*treeIndex+2, index, val, mid + 1, hi);
+        }
+        else updateTree(2*treeIndex+1, index, val, lo, mid);
+        
+        segTree[treeIndex] = segTree[2*treeIndex+1] + segTree[2*treeIndex+2];
+    }
+    
+    int queryTree(int treeIndex, int left, int right, int lo, int hi) {
+        //query sum for nums[left...right]
+        if (lo > right || hi < left) {
+            return 0;
+        }//out of range case
+        
+        if (lo >= left && hi <= right) {
+            return segTree[treeIndex];
+        }//completely in range case
+        
+        int mid = lo + (hi - lo) / 2;
+        
+        if (left > mid) return queryTree(2*treeIndex+2, left, right, mid+1, hi);
+        else if (right <= mid) return queryTree(2*treeIndex+1, left, right, lo, mid);
+        
+        //case where left < mid && mid < right
+        int leftQuery = queryTree(2*treeIndex+1, left, mid, lo, mid);
+        int rightQuery = queryTree(2*treeIndex+2, mid+1, right, mid+1, hi);
+        
+        return leftQuery + rightQuery;
+    }
+};
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray* obj = new NumArray(nums);
+ * obj->update(index,val);
+ * int param_2 = obj->sumRange(left,right);
+ */
